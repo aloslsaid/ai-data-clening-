@@ -13,7 +13,7 @@ def test_clean_csv_normalizes_columns_and_removes_duplicates():
 
 
 def test_clean_csv_preserves_high_missingness_for_review():
-    raw = b"value\n1\n\n\n\n\n\n\n\n\n\n\n\n"
+    raw = b"value,other\n1,x\n,x\n,x\n,x\n,x\n,x\n,x\n,x\n,x\n,x\n,x\n"
     cleaned, report = process_csv(raw)
     assert "value" in cleaned.columns
     assert report["missing_value_decisions"][0]["action"] == "review"
