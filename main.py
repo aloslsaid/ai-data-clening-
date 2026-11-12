@@ -226,8 +226,8 @@ def add_date_features(
             f"{prefix}_year": parsed.dt.year,
             f"{prefix}_month": parsed.dt.month,
             f"{prefix}_day": parsed.dt.day,
-            f"{prefix}_weekday": parsed.dt.dayofweek,
-            f"{prefix}_is_weekend": parsed.dt.dayofweek.isin([5, 6]).astype("Int64"),
+            f"{prefix}_weekday": parsed.dt.day_of_week,
+            f"{prefix}_is_weekend": parsed.dt.day_of_week.isin([5, 6]).astype("Int64"),
             f"{prefix}_quarter": parsed.dt.quarter,
         }
 
