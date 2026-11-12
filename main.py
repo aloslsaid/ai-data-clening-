@@ -366,6 +366,12 @@ def run_sql_checks(df: pd.DataFrame) -> dict[str, Any]:
         }
 
 
+def safe_output_stem(filename: str) -> str:
+    stem = filename.rsplit(".", 1)[0]
+    safe = re.sub(r"[^A-Za-z0-9._-]+", "_", stem).strip("._-")
+    return safe[:80] or "dataset"
+
+
 def process_csv(file_bytes: bytes) -> tuple[pd.DataFrame, dict[str, Any]]:
     try:
         df = pd.read_csv(io.BytesIO(file_bytes))
@@ -472,7 +478,7 @@ async def clean_dataset(file: UploadFile = File(...)) -> dict[str, Any]:
 
     return {
         "original_filename": file.filename,
-        "download_filename": f"cleaned_{file.filename.rsplit('.', 1)[0]}.csv",
+        "download_filename": f"cleaned_{safe_output_stem(file.filename)}.csv",
         "report": report,
         "preview": cleaned_df.head(10).replace({np.nan: None}).to_dict(orient="records"),
     }
@@ -503,7 +509,7 @@ async def clean_and_download(file: UploadFile = File(...)) -> StreamingResponse:
     cleaned_df.to_csv(output, index=False, encoding="utf-8-sig")
     output.seek(0)
 
-    filename = f"cleaned_{file.filename.rsplit('.', 1)[0]}.csv"
+    filename = f"cleaned_{safe_output_stem(file.filename)}.csv"
 
     return StreamingResponse(
         output,
