@@ -1,75 +1,31 @@
-# React + TypeScript + Vite
+# MLPrep AI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+MLPrep AI is a browser-based CSV inspection and cleaning interface built with React, TypeScript, and Vite. It parses CSV files in the browser, summarizes rows/columns, detects duplicate rows and missing values, and displays basic column-type information. The interface also attempts to call a local cleaning API at `http://127.0.0.1:8000/api/clean` and a download endpoint.
 
-Currently, two official plugins are available:
+## Frontend setup
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Requirements: Node.js and npm.
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```sh
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+Open the local URL printed by Vite. For a production build and lint check:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```sh
+npm run build
+npm run lint
 ```
+
+## Cleaning API
+
+The tracked root contains a `main.py` bytecode file (`main.cpython-314.pyc`) but no corresponding `main.py` source implementation or Python dependency manifest. Therefore, CSV inspection in the browser is distinct from the server-side clean/download actions, and the backend is not currently documented as runnable from this repository. The cleaning buttons require a separately available service implementing the endpoints in `App.tsx`; do not assume that one is included.
+
+## Data and privacy
+
+CSV inspection runs in the browser; when you request cleaning, the selected file is sent to the configured API. Do not upload sensitive data unless you control and trust that service. The UI's detected types and quality summaries are heuristics, not a guarantee that a dataset is ready for a particular model.
+
+## Tests
+
+No test script is defined in `package.json`. `npm run build` and `npm run lint` provide the available build/static checks; their results must be run and recorded in the environment where changes are made. Add tests for CSV parsing and cleaning interactions.
