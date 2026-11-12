@@ -5,6 +5,7 @@ import io
 import re
 import sqlite3
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -28,6 +29,13 @@ app.add_middleware(
 )
 
 MISSING_MARKERS = {"", "null", "none", "na", "n/a", "nan", "missing", "unknown"}
+MAX_UPLOAD_BYTES = 50 * 1024 * 1024
+
+
+def safe_output_stem(filename: str) -> str:
+    stem = Path(filename).name.rsplit(".", 1)[0]
+    safe = re.sub(r"[^A-Za-z0-9._-]+", "_", stem).strip("._-")
+    return safe or "dataset"
 
 ID_NAME_PATTERN = re.compile(
     r"(^id$|_id$|^id_|uuid|row.?number|index|record.?number)",
@@ -218,8 +226,8 @@ def add_date_features(
             f"{prefix}_year": parsed.dt.year,
             f"{prefix}_month": parsed.dt.month,
             f"{prefix}_day": parsed.dt.day,
-            f"{prefix}_weekday": parsed.dt.dayofweek,
-            f"{prefix}_is_weekend": parsed.dt.dayofweek.isin([5, 6]).astype("Int64"),
+            f"{prefix}_weekday": parsed.dt.day_of_week,
+            f"{prefix}_is_weekend": parsed.dt.day_of_week.isin([5, 6]).astype("Int64"),
             f"{prefix}_quarter": parsed.dt.quarter,
         }
 
@@ -391,6 +399,7 @@ def process_csv(file_bytes: bytes) -> tuple[pd.DataFrame, dict[str, Any]]:
         ):
             text = df[col].astype("string").str.strip()
             missing = text.str.lower().isin(MISSING_MARKERS)
+            df[col] = text
             df.loc[missing.fillna(False), col] = np.nan
             df[col] = df[col].replace(r"^\s*$", np.nan, regex=True)
 
@@ -455,12 +464,12 @@ async def clean_dataset(file: UploadFile = File(...)) -> dict[str, Any]:
             detail="Please upload a CSV file.",
         )
 
-    content = await file.read()
+    content = await file.read(MAX_UPLOAD_BYTES + 1)
 
     if not content:
         raise HTTPException(status_code=400, detail="The uploaded file is empty.")
 
-    if len(content) > 50 * 1024 * 1024:
+    if len(content) > MAX_UPLOAD_BYTES:
         raise HTTPException(
             status_code=413,
             detail="File is too large. Maximum supported size is 50 MB.",
@@ -470,7 +479,7 @@ async def clean_dataset(file: UploadFile = File(...)) -> dict[str, Any]:
 
     return {
         "original_filename": file.filename,
-        "download_filename": f"cleaned_{file.filename.rsplit('.', 1)[0]}.csv",
+        "download_filename": f"cleaned_{safe_output_stem(file.filename)}.csv",
         "report": report,
         "preview": cleaned_df.head(10).replace({np.nan: None}).to_dict(orient="records"),
     }
@@ -484,12 +493,12 @@ async def clean_and_download(file: UploadFile = File(...)) -> StreamingResponse:
             detail="Please upload a CSV file.",
         )
 
-    content = await file.read()
+    content = await file.read(MAX_UPLOAD_BYTES + 1)
 
     if not content:
         raise HTTPException(status_code=400, detail="The uploaded file is empty.")
 
-    if len(content) > 50 * 1024 * 1024:
+    if len(content) > MAX_UPLOAD_BYTES:
         raise HTTPException(
             status_code=413,
             detail="File is too large. Maximum supported size is 50 MB.",
@@ -501,7 +510,7 @@ async def clean_and_download(file: UploadFile = File(...)) -> StreamingResponse:
     cleaned_df.to_csv(output, index=False, encoding="utf-8-sig")
     output.seek(0)
 
-    filename = f"cleaned_{file.filename.rsplit('.', 1)[0]}.csv"
+    filename = f"cleaned_{safe_output_stem(file.filename)}.csv"
 
     return StreamingResponse(
         output,
