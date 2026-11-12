@@ -14,7 +14,7 @@ MLPrep AI is a CSV inspection and cleaning workspace with a React + TypeScript +
 
 ## Requirements
 
-- Node.js 20+ and npm.
+- Node.js 20.19+ or 22.12+ (required by Vite 8) and npm.
 - Python 3.10+.
 
 ## Run the frontend
