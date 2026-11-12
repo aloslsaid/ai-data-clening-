@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from main import process_csv
+from main import process_csv, safe_output_stem
 
 
 def test_clean_csv_normalizes_columns_and_removes_duplicates():
@@ -22,3 +22,7 @@ def test_clean_csv_preserves_high_missingness_for_review():
 def test_invalid_csv_is_rejected():
     with pytest.raises(Exception):
         process_csv(b"\xff\xfe\x00")
+
+
+def test_output_filename_is_sanitized():
+    assert safe_output_stem('../../report\r\nX-Injected: yes.csv') == 'report_X-Injected_yes'
