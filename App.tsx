@@ -312,7 +312,6 @@ async function cleanDataset(selected: File) {
             </>
           )}
         </section>
-```tsx
 {analyzing && (
   <section className="report-panel">
     <h2>Analyzing your dataset...</h2>
@@ -450,7 +449,6 @@ async function cleanDataset(selected: File) {
   </section>
 )}
 
-```
         <section className="section-heading" id="features">
           <div>
             <h2>Everything your data needs</h2>
