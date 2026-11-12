@@ -399,7 +399,7 @@ def process_csv(file_bytes: bytes) -> tuple[pd.DataFrame, dict[str, Any]]:
         ):
             text = df[col].astype("string").str.strip()
             missing = text.str.lower().isin(MISSING_MARKERS)
-df[col] = text
+            df[col] = text
             df.loc[missing.fillna(False), col] = np.nan
             df[col] = df[col].replace(r"^\s*$", np.nan, regex=True)
 
