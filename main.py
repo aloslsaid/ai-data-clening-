@@ -27,6 +27,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+MAX_UPLOAD_BYTES = 50 * 1024 * 1024
+
 MISSING_MARKERS = {"", "null", "none", "na", "n/a", "nan", "missing", "unknown"}
 
 ID_NAME_PATTERN = re.compile(
@@ -460,7 +462,7 @@ async def clean_dataset(file: UploadFile = File(...)) -> dict[str, Any]:
     if not content:
         raise HTTPException(status_code=400, detail="The uploaded file is empty.")
 
-    if len(content) > 50 * 1024 * 1024:
+    if len(content) > MAX_UPLOAD_BYTES:
         raise HTTPException(
             status_code=413,
             detail="File is too large. Maximum supported size is 50 MB.",
