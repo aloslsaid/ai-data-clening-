@@ -1,31 +1,83 @@
-# MLPrep AI
+# MLPrep AI — Intelligent Dataset Preparation
 
-MLPrep AI is a browser-based CSV inspection and cleaning interface built with React, TypeScript, and Vite. It parses CSV files in the browser, summarizes rows/columns, detects duplicate rows and missing values, and displays basic column-type information. The interface also attempts to call a local cleaning API at `http://127.0.0.1:8000/api/clean` and a download endpoint.
+> A full-stack data-preparation workspace for inspecting CSV quality, identifying data issues, and preparing cleaner tabular data for machine-learning workflows.
 
-## Frontend setup
+## Product vision
+Machine-learning projects often spend more time understanding and preparing data than fitting a model. MLPrep AI provides a visual workspace for uploading a CSV, inspecting its structure, reviewing missing values and duplicate rows, and requesting automated cleaning through a local Python API.
 
-Requirements: Node.js and npm.
+## Frontend capabilities
+- React + TypeScript interface powered by Vite.
+- CSV upload through a file picker or drag-and-drop workflow.
+- Browser-side parsing using Papa Parse.
+- Dataset overview with row and column counts.
+- Duplicate-row detection.
+- Per-column missing-value counts and percentages.
+- Heuristic column-type detection for numeric, date, and text values.
+- Cleaning workflow that sends the selected file to the backend.
+- Result state for presenting the API response and prepared output.
 
-```sh
-npm install
-npm run dev
+## Backend capabilities
+The FastAPI service in `main.py` provides the data-processing layer. Its visible implementation includes:
+- CSV ingestion and tabular validation.
+- Column-name normalization and duplicate-name handling.
+- Detection of common missing-value markers.
+- Conservative inference of numeric columns when values are consistently numeric.
+- Detection of possible identifier and constant columns for review.
+- Numeric sanity checks, including handling infinite values and selected domain-specific invalid values.
+- A local API intended to connect the browser interface to server-side cleaning and downloadable results.
+
+## Technology stack
+- Frontend: React, TypeScript, Vite, Papa Parse.
+- Backend: Python, FastAPI, Pandas, NumPy.
+- API communication: HTTP multipart file upload.
+
+## Requirements
+- Node.js and npm.
+- Python 3.10+.
+- Python packages: `fastapi`, `uvicorn`, `pandas`, `numpy`, and `python-multipart`.
+
+## Install
+Clone the repository:
+```bash
+git clone https://github.com/aloslsaid/ai-data-clening-.git
+cd ai-data-clening-
 ```
 
-Open the local URL printed by Vite. For a production build and lint check:
+Install frontend dependencies:
+```bash
+npm install
+```
 
-```sh
+Create a Python environment and install backend dependencies:
+```bash
+python -m venv .venv
+# Windows
+.venv\Scripts\activate
+# macOS / Linux
+source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install fastapi uvicorn pandas numpy python-multipart
+```
+
+## Run locally
+Start the backend in one terminal:
+```bash
+uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```
+Start the frontend in another terminal:
+```bash
+npm run dev
+```
+Open the Vite URL shown in the terminal. The current frontend calls the local API at `http://127.0.0.1:8000`; keep that address or update the frontend API URL in your own configuration if you change the backend port.
+
+## Build checks
+```bash
 npm run build
 npm run lint
 ```
 
-## Cleaning API
+## Data safety
+Dataset profiling and cleaning are not substitutes for understanding the meaning of columns. Automated rules can misinterpret domain-specific values. Review the generated report and retain an untouched copy of source data. Do not upload confidential or personally identifiable datasets to services you do not control.
 
-The tracked root contains a `main.py` bytecode file (`main.cpython-314.pyc`) but no corresponding `main.py` source implementation or Python dependency manifest. Therefore, CSV inspection in the browser is distinct from the server-side clean/download actions, and the backend is not currently documented as runnable from this repository. The cleaning buttons require a separately available service implementing the endpoints in `App.tsx`; do not assume that one is included.
-
-## Data and privacy
-
-CSV inspection runs in the browser; when you request cleaning, the selected file is sent to the configured API. Do not upload sensitive data unless you control and trust that service. The UI's detected types and quality summaries are heuristics, not a guarantee that a dataset is ready for a particular model.
-
-## Tests
-
-No test script is defined in `package.json`. `npm run build` and `npm run lint` provide the available build/static checks; their results must be run and recorded in the environment where changes are made. Add tests for CSV parsing and cleaning interactions.
+## Skills demonstrated
+Data quality analysis · CSV processing · Full-stack development · FastAPI · React · TypeScript · Pandas · Missing-data handling · Data validation
